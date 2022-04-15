@@ -309,7 +309,7 @@ async def async_try_play_once(join_code: str, join_as: str):
     logging.basicConfig()
     main_logger = logging.getLogger(__name__)
     main_logger.setLevel(logging.DEBUG)
-    main_logger.addHandler(logging.FileHandler("main.log"))
+    main_logger.addHandler(logging.FileHandler("logs/main.log"))
 
     api: HttpApiHandler = V2HttpApiHandler(main_logger)
 
