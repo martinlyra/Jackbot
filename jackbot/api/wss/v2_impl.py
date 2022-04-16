@@ -99,7 +99,7 @@ class V2WssApiHandler(WssApiHandler):
         successful = False
         while send_attempt < self.MAX_SEND_TRIES and not successful:
             send_attempt += 1
-            self.log.debug("SEND - T%i: %s" % (this_packet_counter, to_send))
+            self.log.debug("SEND - (Try %i): %s" % (send_attempt, to_send))
             try:
                 await self.socket.send(to_send)
 
