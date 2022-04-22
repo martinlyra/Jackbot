@@ -1,5 +1,6 @@
 from enum import IntEnum
 import logging
+from math import floor
 from aitextgen import aitextgen
 import regex
 
@@ -7,10 +8,11 @@ from jackbot.singleton import Singleton
 
 
 BLANKS_PATTERN = regex.compile(r"_+")
+PUNCTUATION_PATTERN = regex.compile(r"[.!?]+")
 
 
 def count_tokens(text: str) -> None:
-    return len(text.split(" "))
+    return floor(len(text)/4)
 
 
 def should_fill_in(text: str) -> bool:
@@ -19,7 +21,8 @@ def should_fill_in(text: str) -> bool:
 
 def output_to_answer(prompt: str, aiout: str) -> str:
     ai_generated = aiout[len(prompt):]
-    return ai_generated.replace("\n", " ").strip()
+    stripped = ai_generated.replace("\n", " ").strip()
+    return PUNCTUATION_PATTERN.split(stripped)[0].strip()
 
 
 class PromptAnswerMethod(IntEnum):
@@ -30,7 +33,7 @@ class PromptAnswerMethod(IntEnum):
 class AiTextOracle(metaclass=Singleton):
     def __init__(self, logger: logging.Logger = None) -> None:
         self.ai = aitextgen()
-        self.ai_temperature = 36.0
+        self.ai_temperature = 2.4
 
         self.logger = logger
         if logger is None:
@@ -59,17 +62,17 @@ class AiTextOracle(metaclass=Singleton):
         p = pieces[0]
 
         ntokens = count_tokens(p)
-        min_n = ntokens + 1
-        max_n = ntokens + 6
+        min_n = ntokens + 2
+        max_n = ntokens + 8
 
         return await self.get_clean_answer(p, min_n, max_n)
 
     async def answer_quip(self, prompt: str) -> str:
-        ntokens = count_tokens(prompt)
-        min_n = ntokens + 1
-        max_n = ntokens + 6
+        p = "Q: %s?\nA:" % prompt
 
-        p = prompt + "\n"
+        ntokens = count_tokens(p)
+        min_n = ntokens + 2
+        max_n = ntokens + 8
 
         return await self.get_clean_answer(p, min_n, max_n)
 
